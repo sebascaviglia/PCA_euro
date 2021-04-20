@@ -1,0 +1,114 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+#####                           R para Componentes Principales 
+#analizamos el desarrollo de distintos atributos de los paises europeos
+
+# Instalamos librerias
+
+# library(Stats)
+library(FactoMineR) 
+library (psych)
+library (factoextra)
+library (ggplot2)
+library(ggrepel)
+library(pastecs)
+library(corrplot)
+
+```
+```{r}
+
+# cargo el set de datos
+
+datos <- read_excel("C:/Users/SEBAS/Downloads/Base de datos Actividad.xlsx")
+
+#estandarizamos
+
+stat.desc(datos,basic=FALSE) 
+
+```
+
+```{r}
+# Matriz Correlacion con el paquete corrplot
+
+R<-cor(datos[2:10], method="pearson") 
+
+
+corrplot(R, p.mat = res1[[1]], sig.level=0.5)
+
+```
+
+
+```{r}
+# realizo el test de barlett para correlaciones
+
+cortest.bartlett(R, n= 24)
+
+# el P-value es cercano a 0 por lo que hay evidencia para rechazar Ho , por lo tanto hay correlacion entre variables
+```
+
+
+```{r}
+#=============================
+# Estimar PCA (Análisis de Componentes Principales)
+#=============================
+
+
+fit<-PCA(datos[2:10],scale.unit=TRUE,ncp=9,graph=TRUE)
+
+
+head(fit)
+
+# Scree plot
+fviz_eig(fit, geom="line")+
+ theme_grey()
+
+
+```
+
+
+```{r}
+# Representación gráfica variables
+
+datos.grafico2<-data.frame(fit$var$coord[,1:2])
+
+ggplot(datos.grafico2)+
+ geom_point(aes(x=Dim.1, y=Dim.2,colour="darkred"))+
+ geom_text_repel(aes(x=Dim.1,
+y=Dim.2),label=rownames(datos.grafico2))+
+ geom_vline(xintercept = 0,colour="darkgray")+
+ geom_hline(yintercept = 0,colour="darkgray")+
+ labs (x="Dimensión 1 (40.01%)", y="Dimensión 2 (23.46%)")+
+ theme(legend.position="none")
+
+```
+
+
+```{r}
+#aplicando  factoextra
+
+fviz_pca_var(fit, col.var="contrib")+
+scale_color_gradient2(low="white", mid="blue",high="red",
+midpoint=10.0)+
+theme_gray()
+
+```
+
+
+```{r}
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
